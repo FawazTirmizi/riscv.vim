@@ -8,8 +8,15 @@ endif
 setlocal iskeyword+=-,$,.
 syntax case match
 
-syntax match   riscvComment    /#.*/
+syntax match   riscvPreProcDef /#define .*/
+syntax match   riscvPreProcInc /#include .*/
+syntax match   riscvPreProc    /#.*/
+syntax match   riscvComment    /\/\/.*/
+syntax region  riscvComment    start=/\/\*/ end=/\*\//
 syntax match   riscvTodo       /\v\c<(fix(me)?|note[s]?|todo|issue|bug|task)[:]?/ containedin=.*Comment
+
+syntax match riscvDef         /[A-Z][A-Z_]*/
+
 " Decimal numbers
 syntax match   riscvNumber     /\<[-]\?\d\+\>/
 " Hex numbers
@@ -19,11 +26,23 @@ syntax region  riscvChar       start=/'/ skip=/\\'/ end=/'/
 syntax match   riscvLabelColon /:/ contained
 syntax match   riscvLabel      /\w\+:/ contains=riscvLabelColon
 
+syntax match   riscvLabel      /[1-9][0-9]*[bf]/
+syntax match   riscvLabel      /[a-z][a-z_]*/
+
+" Vector instructions
+"   This is a rather messy way to do it, and if any labels start with the
+"   character v this will override them. It would be better to write out every
+"   instruction like how the F extension instructions are.
+syntax keyword riscvInstruction vsetvli
+syntax match   riscvInstruction /v[a-z0-9.]*/
+
 " Registers
 " Numbered registers
-syntax match   riscvRegister /\<x\([1-2]?[0-9]\|3[0-1]\)\>/
+syntax match   riscvRegister /\<x\([1-2]\?[0-9]\|3[0-1]\)\>/
 " Including floating-point ones
-syntax match   riscvRegister /\<f\([1-2]?[0-9]\|3[0-1]\)\>/
+syntax match   riscvRegister /\<f\([1-2]\?[0-9]\|3[0-1]\)\>/
+" Vector registers
+syntax match   riscvRegister /\<v\([1-2]\?[0-9]\|3[0-1]\)\>/
 
 " psABI
 " Symbolic register names
@@ -340,15 +359,19 @@ syntax match   riscvDirective "\<%tls_ie_pcrel_hi\>"
 syntax match   riscvDirective "\<%tls_gd_pcrel_hi\>"
 syntax match   riscvDirective "\<%got_pcrel_hi\>"
 
+hi def link riscvDef            Identifier
+hi def link riscvPreProc        PreProc
+hi def link riscvPreProcDef     Comment
+hi def link riscvPreProcInc     Include
 hi def link riscvComment        Comment
 hi def link riscvTodo           Todo
 hi def link riscvNumber         Number
 hi def link riscvString         String
-hi def link riscvChar           String
-hi def link riscvRegister       Type
-hi def link riscvCSRegister     Function
+hi def link riscvChar           Character
+hi def link riscvRegister       Identifier
+hi def link riscvCSRegister     Identifier
 hi def link riscvLabel          Label
 hi def link riscvDirective      Preproc
-hi def link riscvInstruction    Keyword
+hi def link riscvInstruction    Operator
 
 let b:current_syntax = "riscv"
